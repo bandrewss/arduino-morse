@@ -21,7 +21,7 @@
   www.github.com/bandrewss
 
   -moved word space into switch statement
-  -moved print_letter_space() function call into print_mores()
+  -moved print_letter_space() function call into print_morse()
   -changed for to while to traverse target string
 
  */
@@ -92,12 +92,6 @@ void print_letter_space(int clk, int out_pin, int d) {
   delay(d / 2);
   // 3
   return;
-}
-
-// print out the space between words
-void print_word_space(int clk, int out_pin, int d) {
-
-  
 }
 
 void do_one_clock_pulse(int clk, int d) {
