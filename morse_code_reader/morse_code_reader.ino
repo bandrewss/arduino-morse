@@ -78,7 +78,6 @@ void setup()
 
 void loop() 
 {
-loop:
     clock_state = digitalRead(CLOCK_IN);
     
     if(clock_state == clock_looking)
@@ -92,7 +91,7 @@ loop:
 
             // always start the buffer on a high read
             if(buf_p == 0 && clock_state == LOW)
-                goto loop;
+                return;
 
             buf[buf_p++] = clock_state;
 
@@ -155,7 +154,7 @@ void decode_clock()
     int data_f = 0;
     int low_space;
     
-    int morse_p = 0;
+    int morse_p = 0; // where to put the morse encodings in buf
 
     // while we are reading valid data
     while(data_p < buf_p)
@@ -168,15 +167,15 @@ void decode_clock()
                 buf[morse_p] = DOT;
                 ++data_p;
             }
-            else if(buf[data_p +1] == HIGH && buf[data_p +2] == HIGH)
+            else if(buf[data_p +1] == HIGH && buf[data_p +2] == HIGH && buf[data_p +3] == LOW)
             {
                 buf[morse_p] = DASH;
                 data_p += 3;
             }
             else
             {
-                buf[morse_p] == ERR;
-                data_p += 1;
+                buf[morse_p] = ERR;
+                ++data_p;
             }
         }
         else
@@ -188,9 +187,11 @@ void decode_clock()
                 ;
 
             low_space = data_f - data_p;
-                
+
+            data_p = data_f;
+            
             if(low_space == 1)
-                morse_p--;
+                continue;
             else if(low_space == 3)
                 buf[morse_p] = LETTER_SPACE;
             else if(low_space == 7)
@@ -199,8 +200,6 @@ void decode_clock()
                 buf[morse_p] = END_STRING;
             else
                 buf[morse_p] = ERR;
-
-            data_p = data_f;
         }
 
         ++morse_p;
@@ -219,15 +218,16 @@ void decode_clock()
 // turn the morse into letters
 void decode_morse()
 {    
-    int decode_p = 0; // where to put the letters
+    int decode_p = 0; // where to put the letters in buf
 
-    int letter_start = 0;
+    int letter_start = 0; // hold the start and end of each morse character
     int letter_end = 0;
     
-    char morse_buf[8];
+    char morse_buf[8]; // hold one morse character
     int morse_p = 0;
 
-    byte morse_hash;
+    // byte and not a char to prevent compiler warnings
+    byte morse_hash; // hold the hash of one morse character
     
     while(letter_start < buf_p)
     {
@@ -326,7 +326,7 @@ void decode_morse()
                 buf[decode_p] = 'N'; 
                 break;
             case MORSE_HASH_O:
-                buf[decode_p] = '0';
+                buf[decode_p] = 'O';
                 break;
             case MORSE_HASH_P:
                 buf[decode_p] = 'P';
